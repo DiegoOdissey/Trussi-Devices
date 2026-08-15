@@ -12,11 +12,13 @@ A custom WinUI application that controls Trussi devices (which are currently not
 
 Knob buttons have different options:
 - **Main volume**: The knob will control Windows volume
-- *Application volume*: **Yet to implement**, the knob will control a specific process name (which can be used to control Discord's volume, Gaming, Browser, etc...)
+- **Application volume**: The knob will control a specific process name (which can be used to control Discord's volume, Gaming, Browser, etc...)
 
 Knobs featuring a press button have also the normal buttons options.
 
 Devices featuring screens (like the AxiDeck) have an option to show a label for each button on said screen.
+
+If you want a custom TrussiDevice feel free to contact me on Discord (@diegoodssey)!
 
 ---
 
