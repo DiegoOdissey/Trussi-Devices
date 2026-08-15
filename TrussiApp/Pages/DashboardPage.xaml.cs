@@ -23,8 +23,7 @@ namespace TrussiApp.Pages
             {
                 _main = main;
                 _main.Serial.ConnectionChanged += OnConnectionChanged;
-                
-                // Check current state right now, don't wait for next event
+
                 UpdateAxiDeckDot(_main.Serial.IsConnected);
             }
         }
@@ -53,9 +52,9 @@ namespace TrussiApp.Pages
             _main?.OpenDetailPanel(typeof(AxiDeckPage));
         }
 
-        private void PorcelliBoardCard_Click(object sender, RoutedEventArgs e)
+        private void TrussiRingCard_Click(object sender, RoutedEventArgs e)
         {
-            _main?.OpenDetailPanel(typeof(PorcelliBoardPage));
+            _main?.OpenDetailPanel(typeof(TrussiRingPage));
         }
     }
 }

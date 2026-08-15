@@ -17,7 +17,7 @@ namespace TrussiApp
         public readonly TrackDetector Tracker = new();
         public readonly BindingManager Bindings = new();
         public readonly TrayManager Tray = new();
-        public readonly PorcelliBindingManager PorcelliBindings = new();
+        public readonly TrussiRingBindingManager TrussiRingBindings = new();
 
         public bool NotificationsEnabled { get; set; } = true;
 
@@ -36,6 +36,7 @@ namespace TrussiApp
 
             // Load saved bindings
             Bindings.Load();
+            TrussiRingBindings.Load();
 
             // Init tray
             Tray.Initialize(this);

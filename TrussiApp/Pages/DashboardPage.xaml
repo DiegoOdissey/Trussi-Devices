@@ -90,17 +90,17 @@
                 </Grid>
             </Button>
 
-            <!-- PorcelliBoard card -->
-            <Button x:Name="PorcelliBoardCard"
-                    Width="220"
-                    Height="280"
+            <!-- TrussiRing card -->
+            <Button x:Name="TrussiRingCard"
+                    Width="160"
+                    Height="200"
                     Padding="0"
                     Background="#1E1E1E"
                     BorderThickness="1"
                     BorderBrush="#2A2A2A"
                     CornerRadius="12"
                     Margin="0,0,16,16"
-                    Click="PorcelliBoardCard_Click">
+                    Click="TrussiRingCard_Click">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -111,10 +111,10 @@
                     <Border Grid.Row="0"
                             CornerRadius="12,12,0,0"
                             Background="#252525">
-                        <Image x:Name="PorcelliBoardThumb"
-                               Source="ms-appx:///Assets/PorcelliBoard.png"
+                        <Image x:Name="TrussiRingThumb"
+                               Source="ms-appx:///Assets/TrussiRing.png"
                                Stretch="Uniform"
-                               Margin="0"/>
+                               Margin="20"/>
                     </Border>
 
                     <Grid Grid.Row="1"
@@ -125,13 +125,13 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0"
-                                   Text="PorcelliBoard"
+                                   Text="TrussiRing"
                                    FontSize="13"
                                 FontWeight="SemiBold"
                                    Foreground="White"
                                    VerticalAlignment="Center"/>
 
-                        <Ellipse x:Name="PorcelliBoardDot"
+                        <Ellipse x:Name="TrussiRingDot"
                                  Grid.Column="1"
                                  Width="8"
                                 Height="8"
