@@ -92,8 +92,8 @@
 
             <!-- TrussiRing card -->
             <Button x:Name="TrussiRingCard"
-                    Width="160"
-                    Height="200"
+                    Width="220"
+                    Height="280"
                     Padding="0"
                     Background="#1E1E1E"
                     BorderThickness="1"
@@ -114,7 +114,7 @@
                         <Image x:Name="TrussiRingThumb"
                                Source="ms-appx:///Assets/TrussiRing.png"
                                Stretch="Uniform"
-                               Margin="20"/>
+                               Margin="0"/>
                     </Border>
 
                     <Grid Grid.Row="1"

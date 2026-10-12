@@ -17,7 +17,9 @@ namespace TrussiApp
     public class TrussiRingBindingManager
     {
         private static string SavePath =>
-            Path.Combine(AppPaths.GetLocalFolder(), "trussiring_bindings.json");
+            Path.Combine(
+                Windows.Storage.ApplicationData.Current.LocalFolder.Path,
+                "trussiring_bindings.json");
 
         public TrussiRingBindingProfile Profile { get; private set; } = new();
 

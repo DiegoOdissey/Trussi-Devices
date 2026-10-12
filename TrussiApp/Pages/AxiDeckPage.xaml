@@ -213,7 +213,8 @@
                                                 BorderThickness="2"
                                         CornerRadius="26"
                                                 Padding="0"
-                                        Click="InputButton_Click">
+                                        Click="InputButton_Click"
+                                        Margin="25,0,0,0">
                                         <TextBlock Text="K1"
                                                         FontSize="11"
                                                         Foreground="#666666"/>
@@ -232,7 +233,8 @@
                                                 BorderThickness="2"
                                         CornerRadius="26"
                                                 Padding="0"
-                                        Click="InputButton_Click">
+                                        Click="InputButton_Click"
+                                        Margin="0,0,25,0">
                                         <TextBlock Text="K2"
                                                         FontSize="11"
                                                         Foreground="#666666"/>
