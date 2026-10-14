@@ -27,7 +27,9 @@ namespace TrussiApp.Pages
             if (e.Parameter is MainWindow main)
             {
                 _main = main;
-                UpdateBadge(false); // no serial yet
+                UpdateBadge(false);
+                _main.TrussiRing.ConnectionChanged += OnConnectionChanged;
+                UpdateBadge(_main.TrussiRing.IsConnected);
             }
 
             _keyButtons = new Dictionary<string, Button>
@@ -37,6 +39,18 @@ namespace TrussiApp.Pages
                 ["KEY:2"] = Key3,
                 ["KEY:3"] = Key4
             };
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            if (_main != null)
+                _main.TrussiRing.ConnectionChanged -= OnConnectionChanged;
+        }
+
+        private void OnConnectionChanged(bool connected)
+        {
+            DispatcherQueue.TryEnqueue(() => UpdateBadge(connected));
         }
 
         private void UpdateBadge(bool connected)

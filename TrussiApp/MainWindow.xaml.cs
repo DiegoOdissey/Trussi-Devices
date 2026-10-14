@@ -18,6 +18,7 @@ namespace TrussiApp
         public readonly BindingManager Bindings = new();
         public readonly TrayManager Tray = new();
         public readonly TrussiRingBindingManager TrussiRingBindings = new();
+        public readonly TrussiRingManager TrussiRing = new();
 
         public bool NotificationsEnabled { get; set; } = true;
 
@@ -55,8 +56,12 @@ namespace TrussiApp
             Tracker.TrackPlaying += OnTrackPlaying;
             Tracker.TrackStopped += OnTrackStopped;
 
-            if (!DebugSimulateConnected)
+            if (!DebugSimulateConnected) {
                 Serial.Start();
+                TrussiRing.Start();
+                TrussiRing.ConnectionChanged += OnTrussiRingConnectionChanged;
+                TrussiRing.ButtonEvent += OnTrussiRingButtonEvent;
+            }
 
             Tracker.Start();
             Console.WriteLine("[App] Init complete.");
@@ -110,16 +115,36 @@ namespace TrussiApp
             if (LogSettings.VerboseTrackLogging)
                 Console.WriteLine($"[App] Track: {title} — {artist} [{duration}] {progress}%");
 
-            if (Serial.IsConnected)
+            if (Serial.IsConnected) {
                 Serial.SendTrack(title, artist, duration, progress);
+                TrussiRing.SendTrack(title, artist, duration, progress);
+            }
         }
 
         private void OnTrackStopped()
         {
             Console.WriteLine("[App] Track stopped.");
 
-            if (Serial.IsConnected)
+            if (Serial.IsConnected) {
                 Serial.SendNoTrack();
+                TrussiRing.SendNoTrack();
+            }
+        }
+
+        private void OnTrussiRingConnectionChanged(bool connected)
+        {
+            Console.WriteLine($"[App] TrussiRing: {(connected ? "CONNECTED" : "DISCONNECTED")}");
+
+            if (NotificationsEnabled)
+                Tray.Notify("TrussiApp",
+                    connected ? "TrussiRing connesso." : "TrussiRing disconnesso.");
+        }
+
+        private void OnTrussiRingButtonEvent(int index, bool pressed)
+        {
+            Console.WriteLine($"[App] TrussiRing Button {index + 1} {(pressed ? "DOWN" : "UP")}");
+            if (pressed)
+                TrussiRingBindings.ExecuteButton(index);
         }
 
         // ─────────────────────────────────────────────

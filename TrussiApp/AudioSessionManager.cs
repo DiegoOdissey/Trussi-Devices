@@ -20,6 +20,48 @@ namespace TrussiApp
             Task.Run(() => AdjustVolumeInternal(processName, direction, step)).Wait();
         }
 
+        public int GetVolumePct(string processName)
+        {
+            return Task.Run(() => GetVolumePctInternal(processName)).GetAwaiter().GetResult();
+        }
+
+        private int GetVolumePctInternal(string processName)
+        {
+            try
+            {
+                using var enumerator = new MMDeviceEnumerator();
+                var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                foreach (var device in devices)
+                {
+                    try
+                    {
+                        device.AudioSessionManager.RefreshSessions();
+                        var sessions = device.AudioSessionManager.Sessions;
+                        for (int i = 0; i < sessions.Count; i++)
+                        {
+                            var session = sessions[i];
+                            try
+                            {
+                                int pid = (int)session.GetProcessID;
+                                if (pid == 0) continue;
+                                string name = GetProcessName(pid);
+                                if (string.Equals(name, processName, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    device.Dispose();
+                                    return (int)(session.SimpleAudioVolume.Volume * 100f);
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                    catch { }
+                    finally { device.Dispose(); }
+                }
+            }
+            catch { }
+            return 50;
+        }
+
         private List<string> GetActiveProcessNamesInternal()
         {
             var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

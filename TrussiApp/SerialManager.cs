@@ -11,13 +11,20 @@ namespace TrussiApp
         // ─────────────────────────────────────────────
         //  CONFIG
         // ─────────────────────────────────────────────
-        private const int BaudRate = 9600;
+        private readonly int _baudRate;
+        private readonly string _expectedAck;
         private const string HandshakeMsg = "CONNECT";
         private const string TimePrefix = "TIME:";
         private const int TimeInterval = 30;
         private const int ReconnectDelay = 5000;
         private const int PingInterval = 5000;
         private const int PongTimeout = 12000;
+
+        public SerialManager(int baudRate = 9600, string expectedAck = "ACK")
+        {
+            _baudRate = baudRate;
+            _expectedAck = expectedAck;
+        }
 
         // ─────────────────────────────────────────────
         //  EVENTS
@@ -26,6 +33,7 @@ namespace TrussiApp
         public event Action<string>? StatusChanged;
         public event Action<int, bool>? ButtonEvent;
         public event Action<int, int>? KnobEvent;
+        public event Action<string>? RawMessageReceived;
 
         // ─────────────────────────────────────────────
         //  STATE
@@ -38,24 +46,25 @@ namespace TrussiApp
         private readonly StringBuilder _readBuffer = new();
         private string? _lastKnownPort = null;
         private DateTime _lastTimeSend = DateTime.MinValue;
+        private string _portCacheKeyName = "lastport";
 
         public bool IsConnected { get; private set; }
         public string? LastKnownPort => _lastKnownPort;
         public DateTime? LastConnectedAt { get; private set; }
 
         // Add with other fields
-        private static string PortCachePath =>
+        private string PortCachePath =>
             Path.Combine(
                 Windows.Storage.ApplicationData.Current.LocalFolder.Path,
                 "lastport.txt");
 
-        private static void SaveLastPort(string portName)
+        private void SaveLastPort(string portName)
         {
             try { File.WriteAllText(PortCachePath, portName); }
             catch { }
         }
 
-        private static string? LoadLastPort()
+        private string? LoadLastPort()
         {
             try
             {
@@ -73,8 +82,9 @@ namespace TrussiApp
         // ─────────────────────────────────────────────
         //  PUBLIC API
         // ─────────────────────────────────────────────
-        public void Start()
+        public void Start(string portCacheKey = "lastport")
         {
+            _portCacheKeyName = portCacheKey;
             _cts = new CancellationTokenSource();
             _lastKnownPort = LoadLastPort();
             Task.Run(() => ConnectionLoop(_cts.Token));
@@ -129,6 +139,12 @@ namespace TrussiApp
         {
             Console.WriteLine("[Serial] -> NOTRACK");
             Send("NOTRACK");
+        }
+
+        public void SendRaw(string msg)
+        {
+            Console.WriteLine($"[Serial] -> {msg}");
+            Send(msg);
         }
 
         // ─────────────────────────────────────────────
@@ -286,7 +302,7 @@ namespace TrussiApp
             SerialPort? probe = null;
             try
             {
-                probe = new SerialPort(portName, BaudRate)
+                probe = new SerialPort(portName, _baudRate)
                 {
                     ReadTimeout = 500,
                     WriteTimeout = 1000,
@@ -307,7 +323,7 @@ namespace TrussiApp
                     if (line != null)
                     {
                         Console.WriteLine($"[Serial] {portName} <- {line}");
-                        if (line == "ACK")
+                        if (line == _expectedAck)
                         {
                             _lastKnownPort = portName;
                             LastConnectedAt = DateTime.Now;
@@ -366,7 +382,7 @@ namespace TrussiApp
         // ─────────────────────────────────────────────
         private void HandleIncoming(string line)
         {
-            if (line == "PONG" || line == "ACK")
+            if (line == "PONG" || line == _expectedAck)
             {
                 lock (_lock) { _lastPong = DateTime.Now; }
                 return;
@@ -404,6 +420,7 @@ namespace TrussiApp
                 return;
             }
 
+            RawMessageReceived?.Invoke(line);
             Console.WriteLine($"[Serial] Unhandled message: {line}");
         }
 

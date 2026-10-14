@@ -23,6 +23,8 @@ namespace TrussiApp.Pages
             {
                 _main = main;
                 _main.Serial.ConnectionChanged += OnConnectionChanged;
+                _main.TrussiRing.ConnectionChanged += OnTrussiRingConnectionChanged;
+                UpdateTrussiRingDot(_main.TrussiRing.IsConnected);
 
                 UpdateAxiDeckDot(_main.Serial.IsConnected);
             }
@@ -31,8 +33,10 @@ namespace TrussiApp.Pages
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
-            if (_main != null)
+            if (_main != null) {
                 _main.Serial.ConnectionChanged -= OnConnectionChanged;
+                _main.TrussiRing.ConnectionChanged -= OnTrussiRingConnectionChanged;
+            }
         }
 
         private void OnConnectionChanged(bool connected)
@@ -43,6 +47,18 @@ namespace TrussiApp.Pages
         private void UpdateAxiDeckDot(bool connected)
         {
             AxiDeckDot.Fill = connected
+                ? new SolidColorBrush(Colors.LimeGreen)
+                : new SolidColorBrush(ColorHelper.FromArgb(255, 200, 50, 50));
+        }
+
+        private void OnTrussiRingConnectionChanged(bool connected)
+        {
+            DispatcherQueue.TryEnqueue(() => UpdateTrussiRingDot(connected));
+        }
+
+        private void UpdateTrussiRingDot(bool connected)
+        {
+            TrussiRingDot.Fill = connected
                 ? new SolidColorBrush(Colors.LimeGreen)
                 : new SolidColorBrush(ColorHelper.FromArgb(255, 200, 50, 50));
         }

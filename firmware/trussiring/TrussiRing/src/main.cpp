@@ -20,10 +20,12 @@
 #define ENCODER_B_PIN 0
 #define ENCODER_BTN_PIN 3 // ASSUMPTION: S1->GND, S2->this pin (INPUT_PULLUP, LOW = pressed)
 #define LED_PIN 4
-#define SW1_PIN 10
-#define SW2_PIN 7
-#define SW3_PIN 6
-#define SW4_PIN 5
+// Physical switch pins — remapped to match corrected wiring:
+// old BTN2->new BTN1, old BTN1->new BTN2, old BTN4->new BTN3, old BTN3->new BTN4
+#define SW1_PIN 7  // was SW2
+#define SW2_PIN 10 // was SW1
+#define SW3_PIN 5  // was SW4
+#define SW4_PIN 6  // was SW3
 #define OLED_SDA_PIN 8
 #define OLED_SCL_PIN 9
 
@@ -128,18 +130,13 @@ int32_t encoderAccum = 0;
 
 // Full-step quadrature transition table.
 // index = (prevState << 2) | currState  ->  -1 / 0 / +1
+// Signs are negated relative to the original to match the physical wiring
+// (encoder A and B inputs are electrically swapped on this build).
 static const int8_t QUAD_TABLE[16] = {
-    0, -1, 1, 0,
-    1, 0, 0, -1,
+    0, 1, -1, 0,
     -1, 0, 0, 1,
-    0, 1, -1, 0};
-
-
-// Function prototypes to prevent the compiler from crying like a baby
-
-void onEncoderPress();
-int findAppIndex(String name);
-void selectApp(int index);
+    1, 0, 0, -1,
+    0, -1, 1, 0};
 
 // ─────────────────────────────────────────────
 //  ENCODER  — interrupt-driven quadrature decode
@@ -268,16 +265,16 @@ void updateLED()
   {
     float phase = (millis() % LED_BREATH_PERIOD) / (float)LED_BREATH_PERIOD * 2.0f * PI;
     uint8_t duty = (uint8_t)(((sinf(phase - PI / 2.0f) + 1.0f) / 2.0f) * 255.0f);
-    ledcWrite(0, duty);
+    ledcWrite(LED_PIN, duty);
   }
   else if (state == ST_WAITING_FOR_PC || state == ST_CONNECTING)
   {
     bool on = (millis() % LED_BLINK_PERIOD) < (LED_BLINK_PERIOD / 2);
-    ledcWrite(0, on ? 255 : 0);
+    ledcWrite(LED_PIN, on ? 255 : 0);
   }
   else
   {
-    ledcWrite(0, 0); // BOOT — LED off, boot screen speaks for itself
+    ledcWrite(LED_PIN, 0); // BOOT — LED off, boot screen speaks for itself
   }
 }
 
@@ -453,7 +450,6 @@ void handleVolumeScreenTimeout()
 //    VOL:<name>:+ / VOL:<name>:-      Volume delta for active target
 //    APPSELECT:<name>                 New active target chosen
 // ─────────────────────────────────────────────
-
 void parseSerialLine(String msg)
 {
   msg.trim();
@@ -572,6 +568,25 @@ void handlePingWatchdog()
 // ─────────────────────────────────────────────
 //  OLED SCREENS
 // ─────────────────────────────────────────────
+// Boot-screen logo bitmap (32×32 px, XBM format, from Lopaka)
+static const unsigned char image_imgbitmap_png_bits[] U8X8_PROGMEM = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0x3f,
+    0xff, 0xff, 0xff, 0x1f, 0xff, 0xff, 0xff, 0x0f,
+    0xff, 0xff, 0xff, 0x07, 0xff, 0xff, 0xff, 0x03,
+    0x00, 0xf8, 0x07, 0x00, 0x00, 0xf8, 0x07, 0x00,
+    0x00, 0xf8, 0x07, 0x00, 0x00, 0xf8, 0x07, 0x00,
+    0x00, 0xf8, 0x07, 0x00, 0x00, 0xf8, 0x07, 0x00,
+    0x00, 0xf8, 0x07, 0x00, 0x00, 0xf8, 0x07, 0x00,
+    0x00, 0xf8, 0x07, 0x00, 0x00, 0xf8, 0x07, 0x00,
+    0x00, 0xf8, 0x07, 0x00, 0x00, 0xf8, 0x07, 0x00,
+    0x00, 0xf8, 0x07, 0x00, 0x00, 0xf8, 0x03, 0x00,
+    0x00, 0xf8, 0x01, 0x00, 0x00, 0xf8, 0x00, 0x00,
+    0x00, 0x78, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00,
+    0x00, 0x18, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
 void drawBootScreen()
 {
   u8g2.clearBuffer();
@@ -579,12 +594,12 @@ void drawBootScreen()
   u8g2.setBitmapMode(1);
   u8g2.setDrawColor(1);
 
-  u8g2.setFont(u8g2_font_profont17_tr);
-  u8g2.drawStr(24, 30, "TrussiRing");
-  u8g2.drawFrame(8, 8, 112, 40);
+  // 32×32 logo centered horizontally, sitting in upper half
+  u8g2.drawXBMP(48, 7, 32, 32, image_imgbitmap_png_bits);
 
-  u8g2.setFont(u8g2_font_profont12_tr);
-  u8g2.drawStr(28, 54, "AxiDeck Ecosystem");
+  // "TrussiRing" label below the logo
+  u8g2.setFont(u8g2_font_profont17_tr);
+  u8g2.drawStr(19, 57, "TrussiRing");
 
   u8g2.sendBuffer();
 }
@@ -794,9 +809,13 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(ENCODER_A_PIN), onEncoderChange, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ENCODER_B_PIN), onEncoderChange, CHANGE);
 
-  ledcAttachPin(LED_PIN, 0);
+  // Status LED (PWM for breathing)
+  // NOTE: on ESP32 Arduino core < 3.0, replace with:
+  //   ledcSetup(0, LED_PWM_FREQ, LED_PWM_RES); ledcAttachPin(LED_PIN, 0);
   //   and use ledcWrite(0, duty) instead of ledcWrite(LED_PIN, duty).
+  ledcAttach(LED_PIN, LED_PWM_FREQ, LED_PWM_RES);
 
+  // OLED
   Wire.begin(OLED_SDA_PIN, OLED_SCL_PIN);
   u8g2.begin();
 
