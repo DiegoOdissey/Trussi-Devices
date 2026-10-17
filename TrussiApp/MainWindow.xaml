@@ -77,7 +77,7 @@
                                         FontSize="12"
                                         Click="CheckUpdates_Click"/>
 
-                                <TextBlock Text="TrussiApp v0.1"
+                                <TextBlock Text="TrussiApp v1.1.2"
                                            FontSize="11"
                                            Foreground="#444444"
                                            Padding="12,0"/>

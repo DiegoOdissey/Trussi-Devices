@@ -219,7 +219,7 @@
 
         <!-- Version -->
         <TextBlock Grid.Row="3"
-                   Text="TrussiApp v0.1 — github.com/DiegoOdissey/AxiDeck"
+                   Text="TrussiApp v1.1.2 — github.com/DiegoOdissey/AxiDeck"
                    FontSize="11"
                 Foreground="#333333"
                    VerticalAlignment="Bottom"/>

@@ -157,7 +157,7 @@ namespace TrussiApp
                 _detailOpen = true;
                 DetailCol.Width = new GridLength(480);
                 DetailDivider.Visibility = Visibility.Visible;
-                SetWindowSize(1600, 800);
+                SetWindowSize(1700, 800);
             }
 
             DetailFrame.Navigate(pageType, this,
