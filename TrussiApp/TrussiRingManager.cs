@@ -16,11 +16,17 @@ namespace TrussiApp
 
         private bool _appListSent = false;
 
+        private readonly System.Timers.Timer _appRefreshTimer;
+
         public TrussiRingManager()
         {
             Serial.ConnectionChanged += OnConnectionChanged;
             Serial.ButtonEvent += OnButtonEvent;
             Serial.RawMessageReceived += OnRawMessage;
+            var refreshTimer = new System.Timers.Timer(5000);
+            refreshTimer.Elapsed += (_, _) => { if (Serial.IsConnected) SendAppList(); };
+            refreshTimer.AutoReset = true;
+            refreshTimer.Start();
         }
 
         public void Start() => Serial.Start(portCacheKey: _portCacheKey);
