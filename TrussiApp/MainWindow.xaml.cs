@@ -117,6 +117,10 @@ namespace TrussiApp
 
             if (Serial.IsConnected) {
                 Serial.SendTrack(title, artist, duration, progress);
+            }
+
+            if(TrussiRing.IsConnected)
+            {
                 TrussiRing.SendTrack(title, artist, duration, progress);
             }
         }
@@ -125,10 +129,11 @@ namespace TrussiApp
         {
             Console.WriteLine("[App] Track stopped.");
 
-            if (Serial.IsConnected) {
+            if (Serial.IsConnected)
                 Serial.SendNoTrack();
+
+            if (TrussiRing.IsConnected)
                 TrussiRing.SendNoTrack();
-            }
         }
 
         private void OnTrussiRingConnectionChanged(bool connected)
@@ -138,6 +143,8 @@ namespace TrussiApp
             if (NotificationsEnabled)
                 Tray.Notify("TrussiApp",
                     connected ? "TrussiRing connesso." : "TrussiRing disconnesso.");
+
+            if(connected) Tracker.ForceResend();
         }
 
         private void OnTrussiRingButtonEvent(int index, bool pressed)

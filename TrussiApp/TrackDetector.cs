@@ -108,6 +108,7 @@ namespace TrussiApp
             string title = props.Title ?? "";
             string artist = props.Artist ?? "";
 
+            await Task.Delay(500);
             var timeline = session.GetTimelineProperties();
 
             string duration = "0:00";
@@ -116,13 +117,15 @@ namespace TrussiApp
             if (timeline != null)
             {
                 double totalSecs = timeline.EndTime.TotalSeconds;
-                TimeSpan elapsedSinceUpdate = DateTimeOffset.UtcNow - timeline.LastUpdatedTime;
+                double positionSecs = timeline.Position.TotalSeconds;
 
-                double positionSecs = timeline.Position.TotalSeconds + elapsedSinceUpdate.TotalSeconds;
+                TimeSpan elapsed = DateTimeOffset.UtcNow - timeline.LastUpdatedTime;
+                if (elapsed.TotalSeconds > 0)
+                    positionSecs += elapsed.TotalSeconds;
 
                 if (totalSecs > 0)
                 {
-                    positionSecs = Math.Min(positionSecs, totalSecs);
+                    positionSecs = Math.Clamp(positionSecs, 0, totalSecs);
 
                     progress = (int)Math.Clamp(
                         (positionSecs / totalSecs) * 100,
@@ -161,5 +164,7 @@ namespace TrussiApp
         {
             await Task.Delay(ms, ct).ContinueWith(_ => { });
         }
+
+        public void ForceResend() => _lastTitle = "";
     }
 }
