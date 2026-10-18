@@ -116,7 +116,10 @@ unsigned long lastPongReceived = 0;
 bool          screenDirty        = true;
 unsigned long lastWaitAnimToggle = 0;
 bool          waitAnimFrame      = false;
+<<<<<<< HEAD
 String        serialLineBuf      = "";
+=======
+>>>>>>> 038dda9885e7554fa0124a056a7caf58d293a1ea
 
 // Switch debounce state
 unsigned long swLastChange[4] = {0, 0, 0, 0};
@@ -129,7 +132,11 @@ bool          encBtnStable     = false;
 bool          encBtnRaw        = false;
 
 // Encoder quadrature decode (interrupt-driven)
+<<<<<<< HEAD
 volatile int16_t encoderDelta     = 0;
+=======
+volatile int8_t encoderDelta     = 0;
+>>>>>>> 038dda9885e7554fa0124a056a7caf58d293a1ea
 volatile uint8_t encoderPrevState = 0;
 int32_t          encoderAccum     = 0;
 
@@ -679,9 +686,13 @@ void updateWaitAnimation() {
 //  SETUP
 // ─────────────────────────────────────────────
 void setup() {
+<<<<<<< HEAD
   Serial.begin(115200);
   Serial.setTimeout(0);
 
+=======
+  Serial.begin(115200);  // NOTE: different from AxiDeck's 9600 — separate COM port, separate rate
+>>>>>>> 038dda9885e7554fa0124a056a7caf58d293a1ea
 
   // Switches — GND-wired, same as AxiDeck
   for (int i = 0; i < 4; i++) pinMode(SW_PINS[i], INPUT_PULLUP);
@@ -717,6 +728,7 @@ void setup() {
 //  LOOP  — fully non-blocking
 // ─────────────────────────────────────────────
 void loop() {
+<<<<<<< HEAD
   while (Serial.available() > 0)
   {
     char c = (char)Serial.read();
@@ -731,6 +743,11 @@ void loop() {
     {
       serialLineBuf += c;
     }
+=======
+  while (Serial.available() > 0) {
+    String line = Serial.readStringUntil('\n');
+    parseSerialLine(line);
+>>>>>>> 038dda9885e7554fa0124a056a7caf58d293a1ea
   }
 
   handleSwitches();
